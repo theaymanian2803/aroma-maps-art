@@ -1,0 +1,113 @@
+const products = [
+  {
+    id: 1,
+    name: 'Ethiopian Yirgacheffe',
+    description: 'Bright, fruity notes with hints of blueberry and citrus. Light roast.',
+    price: '$18.00',
+    weight: '250g',
+    image: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=600&q=80',
+    tag: 'Best Seller',
+  },
+  {
+    id: 2,
+    name: 'Colombian Supremo',
+    description: 'Rich, smooth body with caramel sweetness and nutty undertones. Medium roast.',
+    price: '$16.00',
+    weight: '250g',
+    image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=600&q=80',
+    tag: null,
+  },
+  {
+    id: 3,
+    name: 'Sumatra Mandheling',
+    description: 'Full-bodied, earthy with notes of dark chocolate and herbs. Dark roast.',
+    price: '$19.00',
+    weight: '250g',
+    image: 'https://images.unsplash.com/photo-1511920170033-f8396924c348?w=600&q=80',
+    tag: 'New',
+  },
+  {
+    id: 4,
+    name: 'House Blend',
+    description: 'Our signature blend - balanced, versatile, perfect for any brewing method.',
+    price: '$14.00',
+    weight: '250g',
+    image: 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?w=600&q=80',
+    tag: null,
+  },
+];
+
+const Products = () => {
+  return (
+    <section id="products" className="section-padding bg-background">
+      <div className="container-max">
+        {/* Section Header */}
+        <div className="text-center mb-16">
+          <span className="inline-block text-terracotta font-medium tracking-widest uppercase text-sm mb-4">
+            Our Selection
+          </span>
+          <h2 className="heading-section text-foreground mb-4">
+            Freshly Roasted Coffee
+          </h2>
+          <p className="text-body text-muted-foreground max-w-2xl mx-auto">
+            Each batch is carefully roasted to bring out the unique characteristics 
+            of every origin. Discover your perfect cup.
+          </p>
+        </div>
+
+        {/* Products Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {products.map((product, index) => (
+            <article
+              key={product.id}
+              className="card-product group animate-fade-up"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              {/* Image */}
+              <div className="relative aspect-square overflow-hidden">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                {product.tag && (
+                  <span className="absolute top-4 left-4 bg-terracotta text-cream text-xs font-medium px-3 py-1 rounded-sm">
+                    {product.tag}
+                  </span>
+                )}
+              </div>
+
+              {/* Content */}
+              <div className="p-6">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <h3 className="font-serif text-lg font-semibold text-foreground group-hover:text-terracotta transition-colors">
+                    {product.name}
+                  </h3>
+                  <span className="text-sm text-muted-foreground">{product.weight}</span>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                  {product.description}
+                </p>
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-foreground">{product.price}</span>
+                  <button className="text-sm font-medium text-terracotta hover:text-terracotta/80 transition-colors">
+                    Add to Cart
+                  </button>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        {/* View All Button */}
+        <div className="text-center mt-12">
+          <a href="#products" className="btn-secondary">
+            View All Products
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default Products;
