@@ -71,7 +71,7 @@ const Checkout = () => {
 
     try {
       // Replace YOUR_FORMSPREE_ID with your actual Formspree form ID
-      const response = await fetch('https://formspree.io/f/YOUR_FORMSPREE_ID', {
+      const response = await fetch('https://formspree.io/f/xlgndygr', {
         method: 'POST',
         body: formPayload,
         headers: {
