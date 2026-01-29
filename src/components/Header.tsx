@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ShoppingBag } from 'lucide-react';
+import { useCart } from '@/hooks/useCart';
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { totalItems, setIsCartOpen } = useCart();
 
   const navLinks = [
     { href: '#home', label: 'Home' },
@@ -12,7 +14,7 @@ const Header = () => {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+    <header className="fixed top-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
       <div className="container-max px-6 md:px-12">
         <nav className="flex items-center justify-between h-20">
           {/* Logo */}
@@ -34,22 +36,39 @@ const Header = () => {
             ))}
           </ul>
 
-          {/* CTA Button */}
-          <a
-            href="#location"
-            className="hidden md:inline-flex btn-primary text-sm py-3 px-6"
-          >
-            Order Now
-          </a>
+          {/* Right Section */}
+          <div className="flex items-center gap-4">
+            {/* Cart Button */}
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="relative p-2 hover:bg-secondary rounded-full transition-colors"
+              aria-label="Open cart"
+            >
+              <ShoppingBag size={22} />
+              {totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-terracotta text-cream text-xs font-medium rounded-full flex items-center justify-center">
+                  {totalItems}
+                </span>
+              )}
+            </button>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden p-2 text-foreground"
-            aria-label="Toggle menu"
-          >
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+            {/* CTA Button */}
+            <a
+              href="#products"
+              className="hidden md:inline-flex btn-primary text-sm py-3 px-6"
+            >
+              Order Now
+            </a>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="md:hidden p-2 text-foreground"
+              aria-label="Toggle menu"
+            >
+              {isOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </nav>
 
         {/* Mobile Navigation */}
@@ -69,7 +88,7 @@ const Header = () => {
               ))}
               <li>
                 <a
-                  href="#location"
+                  href="#products"
                   onClick={() => setIsOpen(false)}
                   className="inline-flex btn-primary text-sm py-3 px-6 mt-2"
                 >
