@@ -1,9 +1,13 @@
+import { useCart } from '@/hooks/useCart';
+import { useToast } from '@/hooks/use-toast';
+
 const products = [
   {
     id: 1,
     name: 'Ethiopian Yirgacheffe',
     description: 'Bright, fruity notes with hints of blueberry and citrus. Light roast.',
     price: '$18.00',
+    priceNum: 18,
     weight: '250g',
     image: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=600&q=80',
     tag: 'Best Seller',
@@ -13,6 +17,7 @@ const products = [
     name: 'Colombian Supremo',
     description: 'Rich, smooth body with caramel sweetness and nutty undertones. Medium roast.',
     price: '$16.00',
+    priceNum: 16,
     weight: '250g',
     image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=600&q=80',
     tag: null,
@@ -22,6 +27,7 @@ const products = [
     name: 'Sumatra Mandheling',
     description: 'Full-bodied, earthy with notes of dark chocolate and herbs. Dark roast.',
     price: '$19.00',
+    priceNum: 19,
     weight: '250g',
     image: 'https://images.unsplash.com/photo-1511920170033-f8396924c348?w=600&q=80',
     tag: 'New',
@@ -31,6 +37,7 @@ const products = [
     name: 'House Blend',
     description: 'Our signature blend - balanced, versatile, perfect for any brewing method.',
     price: '$14.00',
+    priceNum: 14,
     weight: '250g',
     image: 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?w=600&q=80',
     tag: null,
@@ -38,6 +45,24 @@ const products = [
 ];
 
 const Products = () => {
+  const { addToCart } = useCart();
+  const { toast } = useToast();
+
+  const handleAddToCart = (product: typeof products[0]) => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      priceNum: product.priceNum,
+      weight: product.weight,
+      image: product.image,
+    });
+    toast({
+      title: 'Added to cart!',
+      description: `${product.name} has been added to your cart.`,
+    });
+  };
+
   return (
     <section id="products" className="section-padding bg-background">
       <div className="container-max">
@@ -90,7 +115,10 @@ const Products = () => {
                 </p>
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-foreground">{product.price}</span>
-                  <button className="text-sm font-medium text-terracotta hover:text-terracotta/80 transition-colors">
+                  <button 
+                    onClick={() => handleAddToCart(product)}
+                    className="text-sm font-medium text-terracotta hover:text-terracotta/80 transition-colors"
+                  >
                     Add to Cart
                   </button>
                 </div>
