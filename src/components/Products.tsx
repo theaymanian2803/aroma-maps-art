@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useCart } from '@/hooks/useCart';
 import { useToast } from '@/hooks/use-toast';
 
@@ -89,7 +90,7 @@ const Products = () => {
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               {/* Image */}
-              <div className="relative aspect-square overflow-hidden">
+              <Link to={`/product/${product.id}`} className="block relative aspect-square overflow-hidden">
                 <img
                   src={product.image}
                   alt={product.name}
@@ -100,14 +101,16 @@ const Products = () => {
                     {product.tag}
                   </span>
                 )}
-              </div>
+              </Link>
 
               {/* Content */}
               <div className="p-6">
                 <div className="flex items-start justify-between gap-2 mb-2">
-                  <h3 className="font-serif text-lg font-semibold text-foreground group-hover:text-terracotta transition-colors">
-                    {product.name}
-                  </h3>
+                  <Link to={`/product/${product.id}`}>
+                    <h3 className="font-serif text-lg font-semibold text-foreground group-hover:text-terracotta transition-colors">
+                      {product.name}
+                    </h3>
+                  </Link>
                   <span className="text-sm text-muted-foreground">{product.weight}</span>
                 </div>
                 <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
