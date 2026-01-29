@@ -1,95 +1,19 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '@/hooks/useCart';
 import { useToast } from '@/hooks/use-toast';
-
-const products = [
-  {
-    id: 1,
-    name: 'Ethiopian Yirgacheffe',
-    description: 'Bright, fruity notes with hints of blueberry and citrus. Light roast.',
-    price: '$18.00',
-    priceNum: 18,
-    weight: '250g',
-    image: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=600&q=80',
-    tag: 'Best Seller',
-  },
-  {
-    id: 2,
-    name: 'Colombian Supremo',
-    description: 'Rich, smooth body with caramel sweetness and nutty undertones. Medium roast.',
-    price: '$16.00',
-    priceNum: 16,
-    weight: '250g',
-    image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=600&q=80',
-    tag: null,
-  },
-  {
-    id: 3,
-    name: 'Sumatra Mandheling',
-    description: 'Full-bodied, earthy with notes of dark chocolate and herbs. Dark roast.',
-    price: '$19.00',
-    priceNum: 19,
-    weight: '250g',
-    image: 'https://images.unsplash.com/photo-1511920170033-f8396924c348?w=600&q=80',
-    tag: 'New',
-  },
-  {
-    id: 4,
-    name: 'House Blend',
-    description: 'Our signature blend - balanced, versatile, perfect for any brewing method.',
-    price: '$14.00',
-    priceNum: 14,
-    weight: '250g',
-    image: 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?w=600&q=80',
-    tag: null,
-  },
-  {
-    id: 5,
-    name: 'Guatemalan Antigua',
-    description: 'Velvety body with cocoa and spice notes, subtle smoky finish. Medium-dark roast.',
-    price: '$17.00',
-    priceNum: 17,
-    weight: '250g',
-    image: 'https://images.unsplash.com/photo-1504630083234-14187a9df0f5?w=600&q=80',
-    tag: null,
-  },
-  {
-    id: 6,
-    name: 'Kenya AA',
-    description: 'Wine-like acidity with blackcurrant and tomato notes. Medium roast.',
-    price: '$20.00',
-    priceNum: 20,
-    weight: '250g',
-    image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&q=80',
-    tag: 'Premium',
-  },
-  {
-    id: 7,
-    name: 'Brazilian Santos',
-    description: 'Mild, nutty sweetness with low acidity. Perfect for espresso. Medium roast.',
-    price: '$15.00',
-    priceNum: 15,
-    weight: '250g',
-    image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&q=80',
-    tag: null,
-  },
-  {
-    id: 8,
-    name: 'Costa Rican Tarrazú',
-    description: 'Bright, clean cup with honey sweetness and citrus zest. Light-medium roast.',
-    price: '$18.00',
-    priceNum: 18,
-    weight: '250g',
-    image: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=600&q=80',
-    tag: 'Staff Pick',
-  },
-];
+import { Product, getProducts } from '@/data/products';
 
 const Products = () => {
+  const [products, setProducts] = useState<Product[]>([]);
   const { addToCart } = useCart();
   const { toast } = useToast();
 
-  const handleAddToCart = (product: typeof products[0]) => {
+  useEffect(() => {
+    setProducts(getProducts());
+  }, []);
+
+  const handleAddToCart = (product: Product) => {
     addToCart({
       id: product.id,
       name: product.name,
