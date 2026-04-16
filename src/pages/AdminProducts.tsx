@@ -21,8 +21,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Pencil, Trash2, Plus, LogOut, RotateCcw } from 'lucide-react';
+import { Pencil, Trash2, Plus, LogOut, RotateCcw, Tags, Cloud } from 'lucide-react';
 import ImageUpload from '@/components/admin/ImageUpload';
+import { getCategories } from '@/data/categories';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const AdminProducts = () => {
   const { isAuthenticated, logout } = useAuth();
@@ -30,6 +38,7 @@ const AdminProducts = () => {
   const { toast } = useToast();
   
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategoriesList] = useState<string[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isNewProduct, setIsNewProduct] = useState(false);
@@ -40,6 +49,7 @@ const AdminProducts = () => {
       return;
     }
     setProducts(getProducts());
+    setCategoriesList(getCategories());
   }, [isAuthenticated, navigate]);
 
   const handleLogout = () => {
@@ -67,6 +77,7 @@ const AdminProducts = () => {
       tag: null,
       origin: '',
       roastLevel: 'Medium',
+      category: '',
       flavorNotes: [],
       brewMethods: [],
     });
@@ -133,6 +144,14 @@ const AdminProducts = () => {
             <p className="text-sm text-muted-foreground">Manage your coffee products</p>
           </div>
           <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" onClick={() => navigate('/admin/categories')}>
+              <Tags className="w-4 h-4 mr-2" />
+              Categories
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate('/admin/r2-settings')}>
+              <Cloud className="w-4 h-4 mr-2" />
+              R2 Settings
+            </Button>
             <Button variant="outline" size="sm" onClick={handleReset}>
               <RotateCcw className="w-4 h-4 mr-2" />
               Reset to Defaults
