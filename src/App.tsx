@@ -12,6 +12,8 @@ import Product from "./pages/Product";
 import Checkout from "./pages/Checkout";
 import AdminLogin from "./pages/AdminLogin";
 import AdminProducts from "./pages/AdminProducts";
+import AdminCategories from "./pages/AdminCategories";
+import AdminR2Settings from "./pages/AdminR2Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +35,16 @@ const App = () => (
               <Route path="/admin/products" element={
                 <ProtectedRoute>
                   <AdminProducts />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/categories" element={
+                <ProtectedRoute>
+                  <AdminCategories />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/r2-settings" element={
+                <ProtectedRoute>
+                  <AdminR2Settings />
                 </ProtectedRoute>
               } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

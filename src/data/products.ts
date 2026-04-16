@@ -10,6 +10,7 @@ export interface Product {
   tag: string | null;
   origin?: string;
   roastLevel?: string;
+  category?: string;
   flavorNotes?: string[];
   brewMethods?: string[];
 }
