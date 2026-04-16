@@ -182,6 +182,7 @@ const AdminProducts = () => {
                 <TableHead className="w-20">Image</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Price</TableHead>
+                <TableHead>Category</TableHead>
                 <TableHead>Origin</TableHead>
                 <TableHead>Roast</TableHead>
                 <TableHead>Tag</TableHead>
@@ -201,6 +202,7 @@ const AdminProducts = () => {
                   </TableCell>
                   <TableCell className="font-medium">{product.name}</TableCell>
                   <TableCell>{product.price}</TableCell>
+                  <TableCell className="text-sm">{product.category || '-'}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{product.origin || '-'}</TableCell>
                   <TableCell className="text-sm">{product.roastLevel || '-'}</TableCell>
                   <TableCell>
@@ -316,7 +318,7 @@ const AdminProducts = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="text-sm font-medium mb-2 block">Origin</label>
                   <Input
@@ -332,6 +334,23 @@ const AdminProducts = () => {
                     onChange={(e) => updateField('roastLevel', e.target.value)}
                     placeholder="Light, Medium, Dark"
                   />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Category</label>
+                  <Select
+                    value={editingProduct.category || ''}
+                    onValueChange={(v) => updateField('category', v === '__none__' ? '' : v)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">— None —</SelectItem>
+                      {categories.map((c) => (
+                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
