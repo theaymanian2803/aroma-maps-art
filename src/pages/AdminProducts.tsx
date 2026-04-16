@@ -21,8 +21,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Pencil, Trash2, Plus, LogOut, RotateCcw } from 'lucide-react';
+import { Pencil, Trash2, Plus, LogOut, RotateCcw, Tags, Cloud } from 'lucide-react';
 import ImageUpload from '@/components/admin/ImageUpload';
+import { getCategories } from '@/data/categories';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const AdminProducts = () => {
   const { isAuthenticated, logout } = useAuth();
@@ -30,6 +38,7 @@ const AdminProducts = () => {
   const { toast } = useToast();
   
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategoriesList] = useState<string[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isNewProduct, setIsNewProduct] = useState(false);
@@ -40,6 +49,7 @@ const AdminProducts = () => {
       return;
     }
     setProducts(getProducts());
+    setCategoriesList(getCategories());
   }, [isAuthenticated, navigate]);
 
   const handleLogout = () => {
@@ -67,6 +77,7 @@ const AdminProducts = () => {
       tag: null,
       origin: '',
       roastLevel: 'Medium',
+      category: '',
       flavorNotes: [],
       brewMethods: [],
     });
@@ -133,6 +144,14 @@ const AdminProducts = () => {
             <p className="text-sm text-muted-foreground">Manage your coffee products</p>
           </div>
           <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" onClick={() => navigate('/admin/categories')}>
+              <Tags className="w-4 h-4 mr-2" />
+              Categories
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate('/admin/r2-settings')}>
+              <Cloud className="w-4 h-4 mr-2" />
+              R2 Settings
+            </Button>
             <Button variant="outline" size="sm" onClick={handleReset}>
               <RotateCcw className="w-4 h-4 mr-2" />
               Reset to Defaults
@@ -163,6 +182,7 @@ const AdminProducts = () => {
                 <TableHead className="w-20">Image</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Price</TableHead>
+                <TableHead>Category</TableHead>
                 <TableHead>Origin</TableHead>
                 <TableHead>Roast</TableHead>
                 <TableHead>Tag</TableHead>
@@ -182,6 +202,7 @@ const AdminProducts = () => {
                   </TableCell>
                   <TableCell className="font-medium">{product.name}</TableCell>
                   <TableCell>{product.price}</TableCell>
+                  <TableCell className="text-sm">{product.category || '-'}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{product.origin || '-'}</TableCell>
                   <TableCell className="text-sm">{product.roastLevel || '-'}</TableCell>
                   <TableCell>
@@ -297,7 +318,7 @@ const AdminProducts = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="text-sm font-medium mb-2 block">Origin</label>
                   <Input
@@ -313,6 +334,23 @@ const AdminProducts = () => {
                     onChange={(e) => updateField('roastLevel', e.target.value)}
                     placeholder="Light, Medium, Dark"
                   />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Category</label>
+                  <Select
+                    value={editingProduct.category || ''}
+                    onValueChange={(v) => updateField('category', v === '__none__' ? '' : v)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">— None —</SelectItem>
+                      {categories.map((c) => (
+                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 

@@ -14,7 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      r2_settings: {
+        Row: {
+          access_key_id: string | null
+          account_id: string | null
+          bucket_name: string | null
+          id: boolean
+          public_domain: string | null
+          secret_access_key: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_key_id?: string | null
+          account_id?: string | null
+          bucket_name?: string | null
+          id?: boolean
+          public_domain?: string | null
+          secret_access_key?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_key_id?: string | null
+          account_id?: string | null
+          bucket_name?: string | null
+          id?: boolean
+          public_domain?: string | null
+          secret_access_key?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
