@@ -1,1 +1,4 @@
 project_id = "wbexexivbtporrgwwgyq"
+
+[functions.r2-upload-url]
+verify_jwt = false

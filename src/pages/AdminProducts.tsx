@@ -22,6 +22,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Pencil, Trash2, Plus, LogOut, RotateCcw } from 'lucide-react';
+import ImageUpload from '@/components/admin/ImageUpload';
 
 const AdminProducts = () => {
   const { isAuthenticated, logout } = useAuth();
@@ -271,11 +272,10 @@ const AdminProducts = () => {
               </div>
 
               <div>
-                <label className="text-sm font-medium mb-2 block">Image URL</label>
-                <Input
+                <label className="text-sm font-medium mb-2 block">Image (URL or upload to R2)</label>
+                <ImageUpload
                   value={editingProduct.image}
-                  onChange={(e) => updateField('image', e.target.value)}
-                  placeholder="https://..."
+                  onChange={(url) => updateField('image', url)}
                 />
               </div>
 
