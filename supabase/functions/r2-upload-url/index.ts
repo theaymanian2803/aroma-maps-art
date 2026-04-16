@@ -1,4 +1,7 @@
 // Generates a presigned PUT URL for Cloudflare R2 (S3-compatible) using AWS SigV4
+// Reads R2 credentials from the r2_settings table (admin-managed), falls back to env vars.
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -7,11 +10,7 @@ const corsHeaders = {
 
 async function hmac(key: ArrayBuffer | Uint8Array, data: string): Promise<ArrayBuffer> {
   const cryptoKey = await crypto.subtle.importKey(
-    'raw',
-    key,
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
+    'raw', key, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
   );
   return crypto.subtle.sign('HMAC', cryptoKey, new TextEncoder().encode(data));
 }
@@ -29,20 +28,14 @@ async function getSigningKey(secret: string, dateStamp: string, region: string, 
   const kDate = await hmac(new TextEncoder().encode('AWS4' + secret), dateStamp);
   const kRegion = await hmac(kDate, region);
   const kService = await hmac(kRegion, service);
-  const kSigning = await hmac(kService, 'aws4_request');
-  return kSigning;
+  return hmac(kService, 'aws4_request');
 }
 
 async function presignPutUrl(opts: {
-  accountId: string;
-  accessKeyId: string;
-  secretAccessKey: string;
-  bucket: string;
-  key: string;
-  contentType: string;
-  expiresIn: number;
+  accountId: string; accessKeyId: string; secretAccessKey: string;
+  bucket: string; key: string; expiresIn: number;
 }) {
-  const { accountId, accessKeyId, secretAccessKey, bucket, key, contentType, expiresIn } = opts;
+  const { accountId, accessKeyId, secretAccessKey, bucket, key, expiresIn } = opts;
   const host = `${accountId}.r2.cloudflarestorage.com`;
   const region = 'auto';
   const service = 's3';
@@ -63,76 +56,85 @@ async function presignPutUrl(opts: {
     'X-Amz-SignedHeaders': 'host',
   };
 
-  const canonicalQuery = Object.keys(params)
-    .sort()
-    .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`)
-    .join('&');
-
-  const canonicalHeaders = `host:${host}\n`;
-  const signedHeaders = 'host';
-  const payloadHash = 'UNSIGNED-PAYLOAD';
+  const canonicalQuery = Object.keys(params).sort()
+    .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`).join('&');
 
   const canonicalRequest = [
-    'PUT',
-    canonicalUri,
-    canonicalQuery,
-    canonicalHeaders,
-    signedHeaders,
-    payloadHash,
+    'PUT', canonicalUri, canonicalQuery,
+    `host:${host}\n`, 'host', 'UNSIGNED-PAYLOAD',
   ].join('\n');
 
   const stringToSign = [
-    'AWS4-HMAC-SHA256',
-    amzDate,
-    credentialScope,
-    await sha256Hex(canonicalRequest),
+    'AWS4-HMAC-SHA256', amzDate, credentialScope, await sha256Hex(canonicalRequest),
   ].join('\n');
 
   const signingKey = await getSigningKey(secretAccessKey, dateStamp, region, service);
   const signature = toHex(await hmac(signingKey, stringToSign));
 
-  const url = `https://${host}${canonicalUri}?${canonicalQuery}&X-Amz-Signature=${signature}`;
-  return url;
+  return `https://${host}${canonicalUri}?${canonicalQuery}&X-Amz-Signature=${signature}`;
+}
+
+async function loadR2Config() {
+  // Prefer DB settings; fall back to env vars
+  const url = Deno.env.get('SUPABASE_URL');
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  let cfg = {
+    accountId: Deno.env.get('R2_ACCOUNT_ID') || '',
+    accessKeyId: Deno.env.get('R2_ACCESS_KEY_ID') || '',
+    secretAccessKey: Deno.env.get('R2_SECRET_ACCESS_KEY') || '',
+    bucket: Deno.env.get('R2_BUCKET_NAME') || '',
+    publicDomain: Deno.env.get('R2_PUBLIC_URL') || Deno.env.get('R2_PUBLIC_DOMAIN') || '',
+  };
+
+  if (url && serviceKey) {
+    try {
+      const supabase = createClient(url, serviceKey);
+      const { data } = await supabase.from('r2_settings').select('*').eq('id', true).maybeSingle();
+      if (data) {
+        cfg = {
+          accountId: data.account_id || cfg.accountId,
+          accessKeyId: data.access_key_id || cfg.accessKeyId,
+          secretAccessKey: data.secret_access_key || cfg.secretAccessKey,
+          bucket: data.bucket_name || cfg.bucket,
+          publicDomain: data.public_domain || cfg.publicDomain,
+        };
+      }
+    } catch (e) {
+      console.error('Failed to load r2_settings:', e);
+    }
+  }
+  return cfg;
 }
 
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
-  }
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
-    const accountId = Deno.env.get('R2_ACCOUNT_ID');
-    const accessKeyId = Deno.env.get('R2_ACCESS_KEY_ID');
-    const secretAccessKey = Deno.env.get('R2_SECRET_ACCESS_KEY');
-    const bucket = Deno.env.get('R2_BUCKET_NAME');
-    const publicUrl = Deno.env.get('R2_PUBLIC_URL');
-
-    if (!accountId || !accessKeyId || !secretAccessKey || !bucket || !publicUrl) {
+    const cfg = await loadR2Config();
+    if (!cfg.accountId || !cfg.accessKeyId || !cfg.secretAccessKey || !cfg.bucket || !cfg.publicDomain) {
       return new Response(
-        JSON.stringify({ error: 'R2 credentials not configured' }),
+        JSON.stringify({ error: 'R2 not configured. Configure it in Admin → R2 Settings.' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const body = await req.json().catch(() => ({}));
     const fileName: string = body.fileName || 'upload.bin';
-    const contentType: string = body.contentType || 'application/octet-stream';
 
-    // Sanitize filename and create unique key
     const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
     const key = `products/${Date.now()}-${crypto.randomUUID().slice(0, 8)}-${safeName}`;
 
     const uploadUrl = await presignPutUrl({
-      accountId,
-      accessKeyId,
-      secretAccessKey,
-      bucket,
+      accountId: cfg.accountId,
+      accessKeyId: cfg.accessKeyId,
+      secretAccessKey: cfg.secretAccessKey,
+      bucket: cfg.bucket,
       key,
-      contentType,
       expiresIn: 300,
     });
 
-    const publicFileUrl = `${publicUrl.replace(/\/$/, '')}/${key}`;
+    const base = cfg.publicDomain.startsWith('http') ? cfg.publicDomain : `https://${cfg.publicDomain}`;
+    const publicFileUrl = `${base.replace(/\/$/, '')}/${key}`;
 
     return new Response(
       JSON.stringify({ uploadUrl, publicUrl: publicFileUrl, key }),
