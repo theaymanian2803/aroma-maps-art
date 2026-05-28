@@ -12,14 +12,14 @@ const ADMIN_EMAIL = 'admin@gmail.com';
 const ADMIN_PASSWORD = '011235@Admin';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    const authStatus = localStorage.getItem('admin_authenticated');
-    if (authStatus === 'true') {
-      setIsAuthenticated(true);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('admin_authenticated') === 'true';
+    } catch {
+      return false;
     }
-  }, []);
+  });
+
 
   const login = (email: string, password: string): boolean => {
     if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
