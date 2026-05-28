@@ -14,6 +14,7 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminProducts from "./pages/AdminProducts";
 import AdminCategories from "./pages/AdminCategories";
 import AdminR2Settings from "./pages/AdminR2Settings";
+import AdminOrders from "./pages/AdminOrders";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,12 @@ const App = () => (
                   <AdminR2Settings />
                 </ProtectedRoute>
               } />
+              <Route path="/admin/orders" element={
+                <ProtectedRoute>
+                  <AdminOrders />
+                </ProtectedRoute>
+              } />
+
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

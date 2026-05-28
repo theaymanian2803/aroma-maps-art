@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
+import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 
@@ -55,45 +56,45 @@ const Checkout = () => {
 
     setIsSubmitting(true);
 
-    // Prepare order details for Formspree
-    const orderDetails = items
-      .map((item) => `${item.name} x${item.quantity} - $${(item.priceNum * item.quantity).toFixed(2)}`)
-      .join('\n');
-
-    const formPayload = new FormData();
-    formPayload.append('name', formData.name);
-    formPayload.append('phone', formData.phone);
-    formPayload.append('address', formData.address);
-    formPayload.append('note', formData.note || 'No additional notes');
-    formPayload.append('order_details', orderDetails);
-    formPayload.append('total', `$${totalPrice.toFixed(2)}`);
-    formPayload.append('payment_method', 'Cash on Delivery');
-
     try {
-      // Replace YOUR_FORMSPREE_ID with your actual Formspree form ID
-      const response = await fetch('https://formspree.io/f/xlgndygr', {
+      const { error } = await supabase.from('orders').insert({
+        customer_name: formData.name,
+        phone: formData.phone,
+        address: formData.address,
+        note: formData.note || null,
+        items: items as unknown as object,
+        total: totalPrice,
+        status: 'pending',
+      });
+
+      if (error) throw error;
+
+      // Best-effort Formspree notification (non-blocking for success)
+      const orderDetails = items
+        .map((item) => `${item.name} x${item.quantity} - $${(item.priceNum * item.quantity).toFixed(2)}`)
+        .join('\n');
+      const formPayload = new FormData();
+      formPayload.append('name', formData.name);
+      formPayload.append('phone', formData.phone);
+      formPayload.append('address', formData.address);
+      formPayload.append('note', formData.note || 'No additional notes');
+      formPayload.append('order_details', orderDetails);
+      formPayload.append('total', `$${totalPrice.toFixed(2)}`);
+      formPayload.append('payment_method', 'Cash on Delivery');
+      fetch('https://formspree.io/f/xlgndygr', {
         method: 'POST',
         body: formPayload,
-        headers: {
-          Accept: 'application/json',
-        },
-      });
+        headers: { Accept: 'application/json' },
+      }).catch(() => { /* ignore */ });
 
-      if (response.ok) {
-        setIsSuccess(true);
-        clearCart();
-      } else {
-        throw new Error('Submission failed');
-      }
-    } catch {
-      toast({
-        title: 'Order Submitted!',
-        description: 'Note: Configure Formspree to receive actual orders.',
-        variant: 'default',
-      });
-      // For demo purposes, show success anyway
       setIsSuccess(true);
       clearCart();
+    } catch (err) {
+      toast({
+        title: 'Order failed',
+        description: err instanceof Error ? err.message : 'Please try again.',
+        variant: 'destructive',
+      });
     } finally {
       setIsSubmitting(false);
     }
