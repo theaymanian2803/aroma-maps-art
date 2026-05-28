@@ -21,7 +21,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Pencil, Trash2, Plus, LogOut, RotateCcw, Tags, Cloud } from 'lucide-react';
+import { Pencil, Trash2, Plus, LogOut, RotateCcw, Tags, Cloud, ShoppingBag } from 'lucide-react';
 import ImageUpload from '@/components/admin/ImageUpload';
 import { getCategories } from '@/data/categories';
 import {
@@ -144,6 +144,10 @@ const AdminProducts = () => {
             <p className="text-sm text-muted-foreground">Manage your coffee products</p>
           </div>
           <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" onClick={() => navigate('/admin/orders')}>
+              <ShoppingBag className="w-4 h-4 mr-2" />
+              Orders
+            </Button>
             <Button variant="outline" size="sm" onClick={() => navigate('/admin/categories')}>
               <Tags className="w-4 h-4 mr-2" />
               Categories
