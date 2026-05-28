@@ -57,15 +57,15 @@ const Checkout = () => {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase.from('orders').insert({
+      const { error } = await supabase.from('orders').insert([{
         customer_name: formData.name,
         phone: formData.phone,
         address: formData.address,
         note: formData.note || null,
-        items: items as unknown as object,
+        items: items as unknown as never,
         total: totalPrice,
         status: 'pending',
-      });
+      }]);
 
       if (error) throw error;
 
