@@ -4,4 +4,9 @@ project_id = "wbexexivbtporrgwwgyq"
 verify_jwt = false
 
 [functions.r2-settings]
+[functions.r2-settings]
 verify_jwt = false
+
+[functions.orders-admin]
+verify_jwt = false
+
