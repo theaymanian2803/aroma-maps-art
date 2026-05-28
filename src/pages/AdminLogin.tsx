@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -13,11 +13,11 @@ const AdminLogin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated (safe declarative redirect)
   if (isAuthenticated) {
-    navigate('/admin/products');
-    return null;
+    return <Navigate to="/admin/products" replace />;
   }
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
