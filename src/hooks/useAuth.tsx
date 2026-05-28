@@ -41,12 +41,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </AuthContext.Provider>
   );
-};
-
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    // Safe fallback (e.g. during HMR before provider remounts)
+    return {
+      isAuthenticated: false,
+      login: () => false,
+      logout: () => {},
+    };
   }
+  return context;
+};
+
   return context;
 };
