@@ -14,7 +14,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { ArrowLeft, RefreshCw, Trash2, Loader2, Eye } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Trash2, Loader2, Eye, Pencil } from 'lucide-react';
 
 const ADMIN_SECRET_KEY = 'admin_api_secret';
 const FN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/orders-admin`;
@@ -58,6 +58,10 @@ const AdminOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [viewing, setViewing] = useState<Order | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [editAddress, setEditAddress] = useState('');
+  const [editNote, setEditNote] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -115,6 +119,49 @@ const AdminOrders = () => {
       toast({ title: 'Deleted', description: 'Order removed.' });
     } catch (e) {
       toast({ title: 'Error', description: e instanceof Error ? e.message : 'Delete failed', variant: 'destructive' });
+    }
+  };
+
+  const openEdit = (o: Order) => {
+    setViewing(o);
+    setEditing(true);
+    setEditAddress(o.address);
+    setEditNote(o.note ?? '');
+  };
+
+  const saveOrderDetails = async () => {
+    if (!viewing) return;
+    setSaving(true);
+    try {
+      const payload: { address?: string; note?: string | null } = {};
+      if (editAddress.trim() !== viewing.address) payload.address = editAddress.trim();
+      const nextNote = editNote.trim() || null;
+      if (nextNote !== viewing.note) payload.note = nextNote;
+
+      if (Object.keys(payload).length === 0) {
+        setEditing(false);
+        return;
+      }
+
+      const res = await fetch(`${FN_URL}?id=${viewing.id}`, {
+        method: 'PATCH',
+        headers: { 'x-admin-secret': adminSecret, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`Failed (${res.status})`);
+
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === viewing.id ? { ...o, ...payload, updated_at: new Date().toISOString() } : o
+        )
+      );
+      setViewing((prev) => (prev ? { ...prev, ...payload, updated_at: new Date().toISOString() } : null));
+      setEditing(false);
+      toast({ title: 'Saved', description: 'Order details updated.' });
+    } catch (e) {
+      toast({ title: 'Error', description: e instanceof Error ? e.message : 'Save failed', variant: 'destructive' });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -216,12 +263,68 @@ const AdminOrders = () => {
         </div>
       </main>
 
-      <Dialog open={!!viewing} onOpenChange={(o) => !o && setViewing(null)}>
+      <Dialog open={!!viewing} onOpenChange={(o) => { if (!o) { setViewing(null); setEditing(false); } }}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Order Details</DialogTitle>
+            <div className="flex items-center justify-between">
+              <DialogTitle>Order Details</DialogTitle>
+              {!editing && (
+                <Button variant="ghost" size="sm" onClick={() => viewing && openEdit(viewing)}>
+                  <Pencil className="w-4 h-4 mr-1" /> Edit
+                </Button>
+              )}
+            </div>
           </DialogHeader>
-          {viewing && (
+          {viewing && editing && (
+            <div className="space-y-4 text-sm">
+              <div>
+                <p className="text-muted-foreground">Customer</p>
+                <p className="font-medium">{viewing.customer_name}</p>
+                <p>{viewing.phone}</p>
+              </div>
+              <div>
+                <label className="text-muted-foreground block mb-1">Address</label>
+                <Input
+                  value={editAddress}
+                  onChange={(e) => setEditAddress(e.target.value)}
+                  placeholder="Delivery address"
+                />
+              </div>
+              <div>
+                <label className="text-muted-foreground block mb-1">Note</label>
+                <textarea
+                  className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  value={editNote}
+                  onChange={(e) => setEditNote(e.target.value)}
+                  placeholder="Customer note"
+                />
+              </div>
+              <div>
+                <p className="text-muted-foreground mb-2">Items</p>
+                <div className="space-y-2">
+                  {(viewing.items || []).map((i, idx) => (
+                    <div key={idx} className="flex justify-between border-b border-border pb-2">
+                      <span>{i.name} {i.weight && `(${i.weight})`} × {i.quantity}</span>
+                      <span>${(i.priceNum * i.quantity).toFixed(2)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex justify-between font-semibold pt-2 border-t border-border">
+                <span>Total</span>
+                <span>${Number(viewing.total).toFixed(2)}</span>
+              </div>
+              <div className="flex gap-2 pt-2">
+                <Button onClick={saveOrderDetails} disabled={saving} className="flex-1">
+                  {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : 'Save Changes'}
+                </Button>
+                <Button variant="outline" onClick={() => setEditing(false)} disabled={saving}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+          {viewing && !editing && (
             <div className="space-y-4 text-sm">
               <div>
                 <p className="text-muted-foreground">Customer</p>
