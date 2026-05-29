@@ -15,6 +15,7 @@ import AdminProducts from "./pages/AdminProducts";
 import AdminCategories from "./pages/AdminCategories";
 import AdminR2Settings from "./pages/AdminR2Settings";
 import AdminOrders from "./pages/AdminOrders";
+import TrackOrder from "./pages/TrackOrder";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
