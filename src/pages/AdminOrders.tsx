@@ -122,6 +122,49 @@ const AdminOrders = () => {
     }
   };
 
+  const openEdit = (o: Order) => {
+    setViewing(o);
+    setEditing(true);
+    setEditAddress(o.address);
+    setEditNote(o.note ?? '');
+  };
+
+  const saveOrderDetails = async () => {
+    if (!viewing) return;
+    setSaving(true);
+    try {
+      const payload: { address?: string; note?: string | null } = {};
+      if (editAddress.trim() !== viewing.address) payload.address = editAddress.trim();
+      const nextNote = editNote.trim() || null;
+      if (nextNote !== viewing.note) payload.note = nextNote;
+
+      if (Object.keys(payload).length === 0) {
+        setEditing(false);
+        return;
+      }
+
+      const res = await fetch(`${FN_URL}?id=${viewing.id}`, {
+        method: 'PATCH',
+        headers: { 'x-admin-secret': adminSecret, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`Failed (${res.status})`);
+
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === viewing.id ? { ...o, ...payload, updated_at: new Date().toISOString() } : o
+        )
+      );
+      setViewing((prev) => (prev ? { ...prev, ...payload, updated_at: new Date().toISOString() } : null));
+      setEditing(false);
+      toast({ title: 'Saved', description: 'Order details updated.' });
+    } catch (e) {
+      toast({ title: 'Error', description: e instanceof Error ? e.message : 'Save failed', variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (!isAuthenticated) return null;
 
   return (
