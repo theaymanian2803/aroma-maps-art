@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Menu, X, ShoppingBag } from 'lucide-react';
+import { Menu, X, ShoppingBag, Package } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useCart } from '@/hooks/useCart';
 
 const Header = () => {
