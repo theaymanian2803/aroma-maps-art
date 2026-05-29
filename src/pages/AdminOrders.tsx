@@ -14,7 +14,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { ArrowLeft, RefreshCw, Trash2, Loader2, Eye } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Trash2, Loader2, Eye, Pencil } from 'lucide-react';
 
 const ADMIN_SECRET_KEY = 'admin_api_secret';
 const FN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/orders-admin`;
