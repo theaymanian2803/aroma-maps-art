@@ -42,14 +42,35 @@ Deno.serve(async (req) => {
     if (req.method === 'PATCH') {
       if (!id) return new Response(JSON.stringify({ error: 'Missing id' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       const body = await req.json();
-      const allowed = ['pending', 'confirmed', 'delivered', 'cancelled'];
-      if (!allowed.includes(body.status)) {
-        return new Response(JSON.stringify({ error: 'Invalid status' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+
+      const allowedStatuses = ['pending', 'confirmed', 'delivered', 'cancelled'];
+      if (body.status !== undefined) {
+        if (!allowedStatuses.includes(body.status)) {
+          return new Response(JSON.stringify({ error: 'Invalid status' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        }
+        updates.status = body.status;
       }
-      const { error } = await supabase
-        .from('orders')
-        .update({ status: body.status, updated_at: new Date().toISOString() })
-        .eq('id', id);
+
+      if (body.address !== undefined) {
+        if (typeof body.address !== 'string') {
+          return new Response(JSON.stringify({ error: 'Invalid address' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        }
+        updates.address = body.address.trim();
+      }
+
+      if (body.note !== undefined) {
+        if (body.note !== null && typeof body.note !== 'string') {
+          return new Response(JSON.stringify({ error: 'Invalid note' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        }
+        updates.note = body.note === null ? null : body.note.trim();
+      }
+
+      if (Object.keys(updates).length === 1) {
+        return new Response(JSON.stringify({ error: 'No valid fields to update' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+
+      const { error } = await supabase.from('orders').update(updates).eq('id', id);
       if (error) throw error;
       return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
