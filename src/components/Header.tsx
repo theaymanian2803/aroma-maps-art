@@ -39,6 +39,15 @@ const Header = () => {
 
           {/* Right Section */}
           <div className="flex items-center gap-4">
+            {/* Track Order */}
+            <Link
+              to="/track"
+              className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Package size={18} />
+              <span>Track Order</span>
+            </Link>
+
             {/* Cart Button */}
             <button
               onClick={() => setIsCartOpen(true)}
