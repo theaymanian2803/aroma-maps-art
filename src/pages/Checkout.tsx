@@ -125,12 +125,28 @@ const Checkout = () => {
           </div>
           <h1 className="heading-section mb-4">Order Confirmed!</h1>
           <p className="text-muted-foreground mb-2">Thank you for your order.</p>
-          <p className="text-muted-foreground mb-8">
+          <p className="text-muted-foreground mb-6">
             We'll contact you shortly to confirm delivery details. Payment will be collected upon delivery.
           </p>
-          <Link to="/" className="btn-primary">
-            Continue Shopping
-          </Link>
+          {orderId && (
+            <div className="bg-card border border-border rounded-lg p-4 mb-6 text-left">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Your Order ID</p>
+              <p className="font-mono text-sm break-all mb-3">{orderId}</p>
+              <p className="text-xs text-muted-foreground">
+                Save this ID. Use it together with your phone number to track your order anytime.
+              </p>
+            </div>
+          )}
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            {orderId && (
+              <Link to={`/track?id=${orderId}`} className="btn-primary">
+                Track Order
+              </Link>
+            )}
+            <Link to="/" className="btn-secondary">
+              Continue Shopping
+            </Link>
+          </div>
         </div>
       </div>
     );
