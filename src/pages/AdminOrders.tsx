@@ -58,6 +58,10 @@ const AdminOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [viewing, setViewing] = useState<Order | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [editAddress, setEditAddress] = useState('');
+  const [editNote, setEditNote] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
