@@ -58,7 +58,7 @@ const Checkout = () => {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase.from('orders').insert([{
+      const { data: inserted, error } = await supabase.from('orders').insert([{
         customer_name: formData.name,
         phone: formData.phone,
         address: formData.address,
@@ -66,9 +66,10 @@ const Checkout = () => {
         items: items as unknown as never,
         total: totalPrice,
         status: 'pending',
-      }]);
+      }]).select('id').single();
 
       if (error) throw error;
+      setOrderId(inserted?.id ?? null);
 
       // Best-effort Formspree notification (non-blocking for success)
       const orderDetails = items
